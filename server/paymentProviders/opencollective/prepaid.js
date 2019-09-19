@@ -80,18 +80,21 @@ async function processOrder(order, options) {
     throw new Error("This payment method doesn't have enough funds to complete this order");
   }
 
+  const platformFeePercent = get(order, 'data platformFeePercent', OC_FEE_PERCENT);
+  const hostFeePercent = get(order, 'data hostFeePercent', order.collective.hostFeePercent);
+
   let hostFeeInHostCurrency, platformFeeInHostCurrency;
 
   if (options && options.skipPlatformFee) {
     platformFeeInHostCurrency = 0;
   } else {
-    platformFeeInHostCurrency = libpayments.calcFee(order.totalAmount, OC_FEE_PERCENT);
+    platformFeeInHostCurrency = libpayments.calcFee(order.totalAmount, platformFeePercent);
   }
 
   if (options && options.skipHostFee) {
     hostFeeInHostCurrency = 0;
   } else {
-    hostFeeInHostCurrency = libpayments.calcFee(order.totalAmount, order.collective.hostFeePercent);
+    hostFeeInHostCurrency = libpayments.calcFee(order.totalAmount, hostFeePercent);
   }
 
   // Use the above payment method to donate to Collective
